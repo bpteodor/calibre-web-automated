@@ -45,13 +45,22 @@ service:
 ingress:
   main:
     enabled: false
+    # className: nginx
+    # hosts:
+    #   - host: books.local
+    #     paths:
+    #       - path: /
+    #         pathType: Prefix
+    #         service:
+    #           identifier: main
+    #           port: http
 
 persistence:
   config:
     size: 100Mi
     type: persistentVolumeClaim
     accessMode: ReadWriteOnce
-    
+
   calibre-library:
     size: 10Gi
     type: persistentVolumeClaim
