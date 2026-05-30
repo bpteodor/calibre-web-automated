@@ -1,0 +1,73 @@
+## This chart relies on the common library chart from bjw-s
+## You can find it at https://github.com/bjw-s-labs/helm-charts/tree/common-5.0.1/charts/library/common
+## Refer there for more detail about the supported values
+
+# 
+controllers:
+  main:
+    containers:
+      main:
+        image:
+          repository: crocodilestick/calibre-web-automated
+          tag: latest
+          pullPolicy: Always
+        
+        # See [calibre-web-automated](https://github.com/crocodilestick/calibre-web-automated)
+        env:
+          # user & group
+          PUID: 1000
+          PGID: 1000
+          # Edit to match your current timezone https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+          TZ: "UTC"
+          # Hardcover API Key required for Hardcover as a Metadata Provider, get one here: https://docs.hardcover.app/api/getting-started/
+          HARDCOVER_TOKEN: your_hardcover_api_key_here
+          # If your library is on a network share (e.g., NFS/SMB), disable WAL to reduce locking issues
+          # Accepts: true/false (default: false)
+          NETWORK_SHARE_MODE: false
+          # Override the default port (8083) for the web server.
+          # Accepts any valid port number.
+          CWA_PORT_OVERRIDE: 8083
+        ports:
+          - containerPort: 8083
+            hostPort: 8083
+        resources:
+          requests:
+            memory: 1Gi
+            cpu: 10m
+
+service:
+  main:
+    controller: main
+    ports:
+      http:
+        port: 8083
+
+ingress:
+  main:
+    enabled: false
+
+persistence:
+  config:
+    size: 100Mi
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    globalMounts:
+      - path: /config
+  books:
+    size: 10Gi
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    globalMounts:
+      - path: /calibre-library
+  # This is an ingest dir, NOT a library one. Anything added here will be automatically added to your library according to the settings you have configured in CWA Settings page. 
+  # All files placed here are REMOVED AFTER PROCESSING!
+  ingest:
+    type: emptyDir
+    globalMounts:
+      - path: /cwa-book-ingest
+  # If you use calibre plugins, you can bind your plugins folder here to have CWA attempt to add them to its workflow (WIP)
+  # If you are starting with a fresh install, you also need to copy customize.py.json to the Calibre config volume above, in /path/to/config/folder/.config/calibre/customize.py.json, see the note below for more info
+  calibre-plugins:
+    type: emptyDir
+    globalMounts:
+      - path: /calibre-plugins

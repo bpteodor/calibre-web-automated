@@ -1,0 +1,24 @@
+apiVersion: v2
+name: calibre-web-automated
+version: 0.1.0
+description: A Help Chart for Calibre-Web-Automated
+
+appVersion: 4.0.6
+home: https://github.com/crocodilestick/calibre-web-automated
+keywords: [calibre, ebooks]
+
+maintainers:
+  - email: bpteodor@users.noreply.github.com
+    name: Teo
+
+sources:
+  - https://github.com/bran-tech/calibre-web-automated
+
+kubeVersion: ">=1.28.0-0"
+
+dependencies:
+  # doc: https://bjw-s-labs.github.io/helm-charts/docs/app-template/
+  # src: https://github.com/bjw-s-labs/helm-charts/tree/main/charts/library/common
+  - name: common
+    version: 5.0.1
+    repository: https://bjw-s-labs.github.io/helm-charts/
