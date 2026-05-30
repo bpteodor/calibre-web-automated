@@ -51,23 +51,18 @@ persistence:
     size: 100Mi
     type: persistentVolumeClaim
     accessMode: ReadWriteOnce
-    globalMounts:
-      - path: /config
-  books:
+    
+  calibre-library:
     size: 10Gi
     type: persistentVolumeClaim
     accessMode: ReadWriteOnce
-    globalMounts:
-      - path: /calibre-library
+
   # This is an ingest dir, NOT a library one. Anything added here will be automatically added to your library according to the settings you have configured in CWA Settings page. 
   # All files placed here are REMOVED AFTER PROCESSING!
-  ingest:
+  cwa-book-ingest:
     type: emptyDir
-    globalMounts:
-      - path: /cwa-book-ingest
+
   # If you use calibre plugins, you can bind your plugins folder here to have CWA attempt to add them to its workflow (WIP)
   # If you are starting with a fresh install, you also need to copy customize.py.json to the Calibre config volume above, in /path/to/config/folder/.config/calibre/customize.py.json, see the note below for more info
   calibre-plugins:
     type: emptyDir
-    globalMounts:
-      - path: /calibre-plugins
