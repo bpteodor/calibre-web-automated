@@ -1,8 +1,8 @@
 version: 2.1
 # @ref https://circleci.com/docs/reference/configuration-reference/
 orbs:
-  #node: circleci/node@5
-  docker: circleci/docker@2.8.0
+  # @see https://circleci.com/developer/orbs/orb/circleci/docker
+  docker: circleci/docker@4.0.0
 
 # parameters:
 #   IS_RELEASE:
