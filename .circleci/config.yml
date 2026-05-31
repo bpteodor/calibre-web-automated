@@ -34,10 +34,11 @@ jobs:
             - run:
                 name: Check if Version already released
                 command: |
-                  LOADED_VER=$(helm show chart oci://$OCI_SERVER/$DOCKERHUB_USERNAME/$CHART_NAME --version $TAG 2>&1)
-                  echo "found version: $LOADED_VER"
-                  if [[ "$LOADED_VER" != *"[Ee]rror"* ]]; then
+                  RESP=$(helm show chart oci://$OCI_SERVER/$DOCKERHUB_USERNAME/$CHART_NAME --version $TAG 2>&1)
+                  echo "found version: $RESP"
+                  if [[ "$RESP" != *"not found"* ]]; then
                     echo "Version $TAG already released. STOP"
+                    echo "response: $RESP"
                     circleci-agent step halt
                   fi
       - run:
