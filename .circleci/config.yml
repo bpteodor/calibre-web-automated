@@ -54,10 +54,10 @@ jobs:
       #     steps:
       - run:
           name: Login to Helm Registry
-          command: echo "srv:$OCI_SERVER  usr:$DOCKERHUB_USERNAME" && helm registry login $OCI_SERVER --username $DOCKERHUB_USERNAME --password $DOCKERHUB_PASSWORD
+          command: helm registry login $OCI_SERVER --username $DOCKER_USER --password $DOCKER_PASSWORD
       - run:
           name: Pushing Helm chart to registry
-          command: helm push "$CHART_NAME-<< parameters.TAG >>.tgz" "oci://$OCI_SERVER/$DOCKERHUB_USERNAME"
+          command: helm push "$CHART_NAME-<< parameters.TAG >>.tgz" "oci://$OCI_SERVER/$DOCKER_USER"
 
 workflows:
   build:
