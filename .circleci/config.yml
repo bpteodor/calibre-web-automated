@@ -17,11 +17,11 @@ jobs:
     environment:
       CHART_NAME: "calibre-web-automated"
       HELM_VER: v4.2.0
-    parameters:
-      TAG:
-        type: string
-        description: tag used for versioning the helm chart
-        default: 0.0.0-<< pipeline.git.branch >>
+    # parameters:
+      # TAG:
+      #   type: string
+      #   description: tag used for versioning the helm chart
+      #   default: 0.0.0-<< pipeline.git.branch >>
       # IS_RELEASE:
       #   description: if set to true will push chart to repo
       #   type: boolean
@@ -36,7 +36,7 @@ jobs:
           #command: echo $DOCKER_PASSWORD | helm registry login $OCI_SERVER --username $DOCKER_USER --password-stdin
       - checkout
       - when:
-          condition: 
+          condition: # TODO remove not
             not: << pipeline.git.branch.is_default >>
           steps:
             - run: 
@@ -45,34 +45,30 @@ jobs:
             - run:
                 command: echo "Extracted version $CHART_NAME:$TAG"
             - run:
-                name: Check if Version Exists
+                name: Check if Version already released
                 command: |
                   if [ $(helm show chart oci://$OCI_SERVER/$DOCKERHUB_USERNAME/$CHART_NAME --version $TAG | yq '.version') == $TAG ]; then
-                    echo "Version already found. No release"
-                    circleci-agent step halt
+                    echo "Version already released. Stopping"
+                    circleci-agent step halt 
+                    # exit 64
                   fi
-            # - run:
-            #     name: Check version match
-            #     command: |-
-            #       echo "checking tag:<< parameters.TAG >> matches Chart..."
-            #       if [ "<< parameters.TAG >>" != "$(helm show chart . |yq '.version')" ]; then
-            #         echo "Version in Chart doesn't match tag" 1>&2
-            #         exit 64
-            #       fi
+      - unless:
+          condition: << pipeline.git.branch.is_default >>
+          steps:
+            - run: 
+                name: Set SNAPSHOT Version
+                command: echo 'export TAG="<< parameters.TAG >>"' >> "$BASH_ENV"
       - run:
-          command: 'echo "releasing << parameters.TAG >> ..."'
+          command: 'echo "releasing $CHART_NAME:$TAG ..."'
       - run:
           name: Update helm dependencies
           command: helm dep update
       - run:
           name: Packaging the Helm Chart
-          command: helm package . --version << parameters.TAG >>
-      # - when:
-      #     condition: << parameters.IS_RELEASE >>
-      #     steps:
+          command: helm package . --version $TAG
       - run:
           name: Pushing Helm chart to registry
-          command: helm push "$CHART_NAME-<< parameters.TAG >>.tgz" "oci://$OCI_SERVER/$DOCKER_USER"
+          command: helm push "$CHART_NAME-$TAG.tgz" "oci://$OCI_SERVER/$DOCKER_USER"
 
 workflows:
   build:
