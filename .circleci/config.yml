@@ -54,8 +54,7 @@ jobs:
           steps:
             - run:
                 name: Login to Helm Registry
-                #command: helm registry login $OCI_SERVER --username $DOCKERHUB_USERNAME --password $DOCKERHUB_PASSWORD
-                command: echo "$DOCKERHUB_PASSWORD" | helm registry login $OCI_SERVER --username $DOCKERHUB_USERNAME --password-stdin
+                command: helm registry login $OCI_SERVER --username $DOCKERHUB_USERNAME --password $DOCKERHUB_PASSWORD
             - run:
                 name: Pushing Helm chart to registry
                 command: helm push "$CHART_NAME-<< parameters.TAG >>.tgz" "oci://$OCI_SERVER/$DOCKERHUB_USERNAME"
