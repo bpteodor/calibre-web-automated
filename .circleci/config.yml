@@ -21,28 +21,45 @@ jobs:
       TAG:
         type: string
         description: tag used for versioning the helm chart
-      IS_RELEASE:
-        description: if set to true will push chart to repo
-        type: boolean
-        default: false
+        default: 0.0.0-<< pipeline.git.branch >>
+      # IS_RELEASE:
+      #   description: if set to true will push chart to repo
+      #   type: boolean
+      #   default: false
     steps:
       - run:
           name: Install and configure helm
           command: sudo curl -L https://get.helm.sh/helm-$HELM_VER-linux-amd64.tar.gz | tar xz && sudo mv linux-amd64/helm /bin/helm && sudo rm -rf linux-amd64
+      - run:
+          name: Login to Helm Registry
+          command: helm registry login $OCI_SERVER --username $DOCKER_USER --password $DOCKER_PASSWORD
+          #command: echo $DOCKER_PASSWORD | helm registry login $OCI_SERVER --username $DOCKER_USER --password-stdin
       - checkout
       - when:
-          condition: << parameters.IS_RELEASE >>
+          condition: << pipeline.git.branch.is_default >>
           steps:
+            - run: 
+                name: Get Chart Version
+                command: echo 'export TAG="$(helm show chart . |yq '.version')"' >> "$BASH_ENV"
             - run:
-                name: Check version match
-                command: |-
-                  echo "checking tag:<< parameters.TAG >> matches Chart..."
-                  if [ "<< parameters.TAG >>" != "$(helm show chart . |yq '.version')" ]; then
-                    echo "Version in Chart doesn't match tag" 1>&2
-                    exit 64
+                command: "Extracted version $CHART_NAME:$TAG"
+            - run:
+                name: Check if Version Exists
+                command: |
+                  if [ $(helm show chart oci://$OCI_SERVER/$DOCKERHUB_USERNAME/$CHART_NAME --version $TAG | yq '.version') == $TAG ]; then
+                    echo "Version already found. No release"
+                    circleci-agent step halt
                   fi
+            # - run:
+            #     name: Check version match
+            #     command: |-
+            #       echo "checking tag:<< parameters.TAG >> matches Chart..."
+            #       if [ "<< parameters.TAG >>" != "$(helm show chart . |yq '.version')" ]; then
+            #         echo "Version in Chart doesn't match tag" 1>&2
+            #         exit 64
+            #       fi
       - run:
-          command: 'echo "release-tag: << parameters.TAG >>"'
+          command: 'echo "releasing << parameters.TAG >> ..."'
       - run:
           name: Update helm dependencies
           command: helm dep update
@@ -53,35 +70,31 @@ jobs:
       #     condition: << parameters.IS_RELEASE >>
       #     steps:
       - run:
-          name: Login to Helm Registry
-          command: helm registry login $OCI_SERVER --username $DOCKER_USER --password $DOCKER_PASSWORD
-      - run:
           name: Pushing Helm chart to registry
           command: helm push "$CHART_NAME-<< parameters.TAG >>.tgz" "oci://$OCI_SERVER/$DOCKER_USER"
 
 workflows:
   build:
-    when:
-      and:
-        - not: << pipeline.git.branch.is_default >>
-        - not: << pipeline.git.tag >>
+    #when:
+    #  not: << pipeline.git.branch.is_default >>
+        #- not: << pipeline.git.tag >>
     jobs:
       - build-chart:
-          TAG: 0.0.0-<< pipeline.git.branch >>
-          IS_RELEASE: false
+          #TAG: 0.0.0-<< pipeline.git.branch >>
+          #IS_RELEASE: false
           context:
             - docker-hub
 
-  release:
-    when: << pipeline.git.tag >>
-    jobs:
-      - build-chart:
-          #requires:
-          #  - build-chart
-          TAG: << pipeline.git.tag >>
-          IS_RELEASE: true
-          filters:
-            tags:
-              only: /\d+\.\d+\.\d+.*/
-          context:
-            - docker-hub
+  # release:
+  #   when: << pipeline.git.branch.is_default >>
+  #   jobs:
+  #     - build-chart:
+  #         #requires:
+  #         #  - build-chart
+  #         #TAG: << pipeline.git.tag >>
+  #         #IS_RELEASE: true
+  #         filters:
+  #           tags:
+  #             only: /\d+\.\d+\.\d+.*/
+  #         context:
+  #           - docker-hub
