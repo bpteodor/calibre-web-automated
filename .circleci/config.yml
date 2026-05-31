@@ -17,6 +17,7 @@ jobs:
     environment:
       CHART_NAME: "calibre-web-automated"
       HELM_VER: v4.2.0
+      TAG: << parameters.TAG >>
     # parameters:
       # TAG:
       #   type: string
@@ -52,12 +53,12 @@ jobs:
                     circleci-agent step halt 
                     # exit 64
                   fi
-      - unless:
-          condition: << pipeline.git.branch.is_default >>
-          steps:
-            - run: 
-                name: Set SNAPSHOT Version
-                command: echo 'export TAG="<< parameters.TAG >>"' >> "$BASH_ENV"
+      # - unless:
+      #     condition: << pipeline.git.branch.is_default >>
+      #     steps:
+      #       - run: 
+      #           name: Set SNAPSHOT Version
+      #           command: echo 'export TAG="<< parameters.TAG >>"' >> "$BASH_ENV"
       - run:
           command: 'echo "releasing $CHART_NAME:$TAG ..."'
       - run:
