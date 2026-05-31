@@ -23,8 +23,7 @@ jobs:
           #command: echo $DOCKER_PASSWORD | helm registry login $OCI_SERVER --username $DOCKER_USER --password-stdin
       - checkout
       - when:
-          condition: 
-            not: << pipeline.git.branch.is_default >>
+          condition: << pipeline.git.branch.is_default >>
           steps:
             - run: 
                 name: Get Chart Version
