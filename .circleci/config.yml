@@ -16,7 +16,7 @@ jobs:
       - image: cimg/base:stable
     environment:
       CHART_NAME: "calibre-web-automated"
-      HELM_VER: v3.19.0
+      HELM_VER: v4.2.0
     parameters:
       TAG:
         type: string
