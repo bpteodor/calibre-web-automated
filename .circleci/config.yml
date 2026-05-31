@@ -17,7 +17,7 @@ jobs:
     environment:
       CHART_NAME: "calibre-web-automated"
       HELM_VER: v4.2.0
-      TAG: << parameters.TAG >>
+      TAG: 0.0.0-<< pipeline.git.branch >>
     # parameters:
       # TAG:
       #   type: string
