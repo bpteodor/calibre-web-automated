@@ -43,7 +43,7 @@ jobs:
                 name: Get Chart Version
                 command: echo 'export TAG="$(helm show chart . |yq '.version')"' >> "$BASH_ENV"
             - run:
-                command: "Extracted version $CHART_NAME:$TAG"
+                command: echo "Extracted version $CHART_NAME:$TAG"
             - run:
                 name: Check if Version Exists
                 command: |
