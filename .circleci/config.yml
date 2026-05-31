@@ -28,15 +28,17 @@ jobs:
             - run: 
                 name: Get Chart Version
                 command: |
-                  echo 'export TAG="$(helm show chart . |yq '.version')"' >> "$BASH_ENV" \
-                    && echo "Extracted version $CHART_NAME:$TAG"
+                  HELM_VER=$(helm show chart . |yq '.version')
+                  echo "Extracted version $CHART_NAME:$HELM_VER"
+                  echo 'export TAG="$HELM_VER"' >> "$BASH_ENV" 
             - run:
                 name: Check if Version already released
                 command: |
-                  if [[ "$(helm show chart oci://$OCI_SERVER/$DOCKERHUB_USERNAME/$CHART_NAME --version $TAG 2>&1)" != *"[Ee]rror"* ]]; then
-                    echo "Version already released. Stopping"
-                    circleci-agent step halt 
-                    # exit 64
+                  LOADED_VER=$(helm show chart oci://$OCI_SERVER/$DOCKERHUB_USERNAME/$CHART_NAME --version $TAG 2>&1)
+                  echo "found version: $LOADED_VER"
+                  if [[ "$LOADED_VER" != *"[Ee]rror"* ]]; then
+                    echo "Version $TAG already released. STOP"
+                    circleci-agent step halt
                   fi
       - run:
           command: 'echo "releasing $CHART_NAME:$TAG ..."'
