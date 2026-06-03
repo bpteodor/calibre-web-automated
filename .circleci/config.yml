@@ -19,8 +19,8 @@ jobs:
           command: sudo curl -L https://get.helm.sh/helm-$HELM_VER-linux-amd64.tar.gz | tar xz && sudo mv linux-amd64/helm /bin/helm && sudo rm -rf linux-amd64
       - run:
           name: Login to Helm Registry
-          command: helm registry login $OCI_SERVER --username $DOCKER_USER --password $DOCKER_PASSWORD
-          #command: echo $DOCKER_PASSWORD | helm registry login $OCI_SERVER --username $DOCKER_USER --password-stdin
+          #command: helm registry login $OCI_SERVER --username $DOCKER_USER --password $DOCKER_PASSWORD
+          command: printf '%s' $DOCKER_PASSWORD | helm registry login $OCI_SERVER --username $DOCKER_USER --password-stdin
       - checkout
       - when:
           condition: << pipeline.git.branch.is_default >>
