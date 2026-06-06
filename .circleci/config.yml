@@ -30,11 +30,11 @@ jobs:
                 command: |
                   HELM_VER=$(helm show chart . |yq '.version')
                   echo "Extracted version $CHART_NAME:$HELM_VER"
-                  echo 'export TAG="$HELM_VER"' >> "$BASH_ENV" 
+                  echo "export TAG=$HELM_VER" >> "$BASH_ENV"
             - run:
                 name: Check if Version already released
                 command: |
-                  RESP=$(helm show chart oci://$OCI_SERVER/$DOCKERHUB_USERNAME/$CHART_NAME --version $TAG 2>&1)
+                  RESP=$(helm show chart oci://$OCI_SERVER/$DOCKERHUB_USERNAME/$CHART_NAME --version $TAG 2>&1) || true
                   echo "response: $RESP"
                   if [[ "$RESP" != *"not found"* ]]; then
                     echo "Version $TAG already released. STOP"
